@@ -48,6 +48,8 @@ if [ ! -f "$P4_PATH/p4" ]; then
     popd
 fi
 
+echo "Log in to Perforce..."
+echo -e "$P4_SOURCE_PASSWD\n" | "$P4_PATH/p4" login
 
 if [ ! -d "$WORKING_PATH" ]; then
     echo "Initializing $P4_SOURCE_PATH..."
