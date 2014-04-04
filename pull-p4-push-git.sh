@@ -28,6 +28,10 @@ export P4PASSWD=$P4_SOURCE_PASSWD
 export GIT_SSH_KEY="$GIT_TARGET_SSH_KEY"
 export GIT_SSH="$BASE_DIR/git-ssh-helper.sh"
 
+# In order to produce the exact same commits on different machines, the commit time zones have to match.
+# I picked Berlin here arbitrarily since my git-p4 repo already uses this timezone.
+export TZ="/usr/share/zoneinfo/Europe/Berlin"
+
 # Perforce handles case sensitivity platform specific. This leads to problems if you mix these platforms.
 # If Windows is involved I recommend to set GIT_IGNORE_CASE=true
 # c.f. http://answers.perforce.com/articles/KB_Article/Case-Sensitivity
