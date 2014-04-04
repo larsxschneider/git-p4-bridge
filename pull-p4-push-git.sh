@@ -62,9 +62,13 @@ echo -e "$P4_SOURCE_PASSWD\n" | "$P4_PATH/p4" login
 if [ ! -d "$WORKING_PATH" ]; then
     echo "Initializing $P4_SOURCE_PATH..."
 
-    ESCAPED_P4_PATH=$(echo "$P4_SOURCE_PATH" | sed 's/\//\\\//g' | sed 's/@all//g')
-    IGNORE_PATTERN_CMD="sed 's/^/-${ESCAPED_P4_PATH}\\//' $IGNORE_PATTERN_FILE"
-    IGNORE_PATTERN=$(eval $IGNORE_PATTERN_CMD)
+    if [ -f $IGNORE_PATTERN_FILE ]; then
+        ESCAPED_P4_PATH=$(echo "$P4_SOURCE_PATH" | sed 's/\//\\\//g' | sed 's/@all//g')
+        IGNORE_PATTERN_CMD="sed 's/^/-${ESCAPED_P4_PATH}\\//' $IGNORE_PATTERN_FILE"
+        IGNORE_PATTERN=$(eval $IGNORE_PATTERN_CMD)
+    else
+        IGNORE_PATTERN=""
+    fi
 
     mkdir -p "$WORKING_PATH"
 
