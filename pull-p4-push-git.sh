@@ -28,6 +28,10 @@ export P4PASSWD=$P4_SOURCE_PASSWD
 export GIT_SSH_KEY="$GIT_TARGET_SSH_KEY"
 export GIT_SSH="$BASE_DIR/git-ssh-helper.sh"
 
+# Perforce handles case sensitivity platform specific. This leads to problems if you mix these platforms.
+# If Windows is involved I recommend to set GIT_IGNORE_CASE=true
+# c.f. http://answers.perforce.com/articles/KB_Article/Case-Sensitivity
+GIT_IGNORE_CASE=true
 
 if [ ! -f "$P4_PATH/p4" ]; then
     echo "P4: Command-Line Client not found! Trying to download it..."
@@ -60,15 +64,22 @@ if [ ! -d "$WORKING_PATH" ]; then
 
     mkdir -p "$WORKING_PATH"
 
+    GIT_IGNORE_CASE_GLOBAL_EXISTING=$(git config --get --global core.ignorecase)
+    git config --global core.ignorecase $GIT_IGNORE_CASE
+
     pushd "$WORKING_PATH"
         $GIT_P4 clone $P4_SOURCE_PATH $IGNORE_PATTERN .
 
         git config --add git-p4.skipSubmitEdit true
         git config --add git-p4.detectRenames true
         git config --add git-p4.detectCopies true
+        git config --add core.ignorecase $GIT_IGNORE_CASE
 
         git remote add bridge $GIT_TARGET_URL
     popd
+
+    git config --global core.ignorecase $GIT_IGNORE_CASE
+
 else
     echo "Syncing $P4_SOURCE_PATH..."
 
