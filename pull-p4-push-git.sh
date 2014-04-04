@@ -62,7 +62,7 @@ echo -e "$P4_SOURCE_PASSWD\n" | "$P4_PATH/p4" login
 if [ ! -d "$WORKING_PATH" ]; then
     echo "Initializing $P4_SOURCE_PATH..."
 
-    if [ -f $IGNORE_PATTERN_FILE ]; then
+    if [[ $IGNORE_PATTERN_FILE && -f $IGNORE_PATTERN_FILE ]]; then
         ESCAPED_P4_PATH=$(echo "$P4_SOURCE_PATH" | sed 's/\//\\\//g' | sed 's/@all//g')
         IGNORE_PATTERN_CMD="sed 's/^/-${ESCAPED_P4_PATH}\\//' $IGNORE_PATTERN_FILE"
         IGNORE_PATTERN=$(eval $IGNORE_PATTERN_CMD)
@@ -98,7 +98,7 @@ else
         # Sync change lists from P4 to git
         $GIT_P4 sync
 
-        if [ -f $IGNORE_PATTERN_FILE ]; then
+        if [[ $IGNORE_PATTERN_FILE && -f $IGNORE_PATTERN_FILE ]]; then
             # Remove ignored files from history since the last commit
             git filter-branch --force --index-filter "git rm -r --cached --ignore-unmatch --force $(tr '\n' ' ' < $IGNORE_PATTERN_FILE)" $LAST_GIT_HASH..p4/master
         fi
