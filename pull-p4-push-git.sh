@@ -3,20 +3,21 @@
 # Sync Perforce repositories to Git
 #
 # Example call:
-# ./pull-p4-push-git.sh //P4/Project@all tcp:P4Server:1672 P4User P4Pass git@GitServer:Project.git GitBranch /path/to/git-ssh.key /path/to/ignore.pattern
+# ./pull-p4-push-git.sh project //P4/Project@all tcp:P4Server:1672 P4User P4Pass git@GitServer:Project.git GitBranch /path/to/git-ssh.key /path/to/ignore.pattern
 #
 
-P4_SOURCE_PATH=$1
-P4_SOURCE_PORT=$2
-P4_SOURCE_USER=$3
-P4_SOURCE_PASSWD=$4
-GIT_TARGET_URL=$5
-GIT_TARGET_BRANCH=$6
-GIT_TARGET_SSH_KEY=$7
-IGNORE_PATTERN_FILE="$8"
+PROJECT_NAME=$1
+P4_SOURCE_PATH=$2
+P4_SOURCE_PORT=$3
+P4_SOURCE_USER=$4
+P4_SOURCE_PASSWD=$5
+GIT_TARGET_URL=$6
+GIT_TARGET_BRANCH=$7
+GIT_TARGET_SSH_KEY=$8
+IGNORE_PATTERN_FILE="$9"
 
 BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-WORKING_PATH="$BASE_DIR/repos/$(echo "$GIT_TARGET_URL" | sed 's/:/\//g' | sed 's/@/\//g')/${GIT_TARGET_BRANCH}"
+WORKING_PATH="$BASE_DIR/repos/$PROJECT_NAME/${GIT_TARGET_BRANCH}"
 
 P4_PATH="$BASE_DIR/p4"
 GIT_P4=$BASE_DIR/git/git-p4.py
@@ -25,8 +26,6 @@ export PATH="$P4_PATH":"$PATH"
 export P4PORT=$P4_SOURCE_PORT
 export P4USER=$P4_SOURCE_USER
 export P4PASSWD=$P4_SOURCE_PASSWD
-export GIT_SSH_KEY="$GIT_TARGET_SSH_KEY"
-export GIT_SSH="$BASE_DIR/git-ssh-helper.sh"
 
 # In order to produce the exact same commits on different machines, the commit time zones have to match.
 # I picked Berlin here arbitrarily since my git-p4 repo already uses this timezone.
@@ -82,8 +81,6 @@ if [ ! -d "$WORKING_PATH" ]; then
         git config --add git-p4.detectRenames true
         git config --add git-p4.detectCopies true
         git config --add core.ignorecase $GIT_IGNORE_CASE
-
-        git remote add bridge $GIT_TARGET_URL
     popd
 
     git config --global core.ignorecase $GIT_IGNORE_CASE
@@ -105,6 +102,7 @@ else
 
         git branch -D $GIT_TARGET_BRANCH
         git checkout -b $GIT_TARGET_BRANCH
-        git push bridge $GIT_TARGET_BRANCH:$GIT_TARGET_BRANCH -f
     popd
+
+    $BASE_DIR/push-git-via-ssh.sh $PROJECT_NAME $GIT_TARGET_URL $GIT_TARGET_BRANCH $GIT_TARGET_SSH_KEY
 fi
